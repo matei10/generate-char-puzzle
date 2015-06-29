@@ -1,7 +1,7 @@
 program creare_puzzle_v2;
 { To Do :
-    - git integration
-    - command line option 
+    - git integration #
+    - command line option #
 
     - poz_4
     - poz_5
@@ -28,7 +28,10 @@ program creare_puzzle_v2;
     
     - countere (ramane de stabilit)
 
-    - Debuging key
+    - check_it_can_be_done ( verificam daca cel mai lung cuvant <= nr_n )
+
+    - interactiv mode 
+
     }
 const max_n = 100; { dimensiunea maxima a matrici  }
       max_m = 100; { numarul maxim de cuvinte  }
@@ -233,10 +236,10 @@ with c do
         end
     else { nu avem loc }
         poz_cuv_3 := false;
-
     end;
-
 end;
+
+{ pozitionam cuvantul in stanga jos, diagonala secundara spre stanga }
 
 { ====================================================== }
 { proceduri legate de matrice }
@@ -368,8 +371,114 @@ while  lowercase(cm) <> 'q' do
     end;
 end;
 
-begin
+{ ====================================================== }
+{ test  }
 
+{ verificam daca exista optiunea <s> }
+function HasOption(s :string):boolean;
+var i :integer;
+begin
+HasOption := false;
+if length(s) = 1 then { short param }
+    begin
+    for i := 1 to ParamCount do { mergem prin parametri }
+        if concat('-', s) = ParamStr(i) then { avem parametrul }
+            begin
+            HasOption := true;
+            break;
+            end;
+    end
+else { long param  }
+    begin
+    for i := 1 to ParamCount do { mergem prin parametri }
+        if concat('--', s) = ParamStr(i) then { avem parametrul }
+            begin
+            HasOption := true;
+            break;
+            end;
+    end;
+end;
+
+{ returnam valoarea parametrului <s> }
+function GetValueParam(s :string):string;
+var i :integer;
+begin
+GetValueParam := '';
+
+if length(s) = 1 then
+    begin
+    for i := 1 to ParamCount do { parcurgem parametri }
+        if concat('-', s) = ParamStr(i) then { am gasit parametrul }
+            begin
+            GetValueParam := ParamStr(i+1); { ii salvam valoarea }
+            break;
+            end;
+    end
+else
+    begin
+    for i := 1 to ParamCount do { parcurgem parametri }
+        if concat('--', s) = ParamStr(i) then { am gasit parametrul }
+            begin
+            GetValueParam := ParamStr(i+1); { ii salvam valoarea }
+            break;
+            end;
+    end;
+end;
+
+{ verificam daca a fost pasat macar un argument }
+function HasParams:boolean;
+begin
+HasParams := (ParamCount > 0)
+end;
+
+
+{ handler }
+procedure HandleInput;
+var f :text;
+    something_was_run :boolean;
+begin
+{ verificam daca exista parametri }
+if HasParams then
+    begin
+    { checking for help  }
+    if HasOption('h') or HasOption('help') then
+        begin
+        writeln('Afisam Help')
+        something_was_run := true; { s-a rulat o comanda }
+        end;
+    else { se doreste rulare }
+        begin
+        { checking for filename problems  }
+        if HasOption('f') then
+            begin
+            writeln('Handle filename -f')
+            something_was_run := true; { s-a rulat o comanda }
+            end
+        else
+            if HasOption('file') then
+                begin
+                writeln('Handle filename --file')
+                something_was_run := true; { s-a rulat o comanda }
+                end
+            else
+                begin
+                writeln('Handle Error, no fileName given');
+                something_was_run := true; { s-a rulat o comanda }
+                end;
+
+        { verificam daca se doreste modul interactiv }
+        if HasOption('i') or HasOption('interactive') then
+            begin
+            writeln('Start Interactive Mode');
+            something_was_run := true; { s-a rulat o comanda }
+            end;
+        end;
+    end
+else
+    writeln('Nu s-au pasat parametri, afisam help then');
+end;
+
+begin
 test;
 end.
 
