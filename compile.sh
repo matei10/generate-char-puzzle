@@ -2,6 +2,6 @@
 
 while true; do
 	fpc program.pas
-	sleep 5;
+	sleep 2;
 	clear;
 done
