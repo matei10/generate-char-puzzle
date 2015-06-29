@@ -3,14 +3,14 @@ program creare_puzzle_v2;
     - git integration #
     - command line option #
 
-    - poz_4
-    - poz_5
+    - poz_4 #
+    - poz_5 #
     - poz_6
     - poz_7
     - poz_8
 
-    - undo_4
-    - undo_5
+    - undo_4 #
+    - undo_5 #
     - undo_6
     - undo_7
     - undo_8
@@ -117,6 +117,30 @@ with c do
 init_cuv(c, c.st);
 end;
 
+{ stergem cuvantul din matrice stiind ca a fost scris pe diagonala secundara in spre stanga }
+procedure undo_cuv_4(var c :cuvant);
+var i :integer;
+begin
+with c do
+    begin
+    for i := 1 to len do
+        if vec_poz[i] then { daca litera a fost pozitionata intr-un loc gol }
+            mat[poz_l+i-1, poz_c-i+1] := '-'; { eliminam litera din matrice }
+    end;
+end;
+
+{ stergem cuvantul din matrice stiind ca a fost scris spre stanga }
+procedure undo_cuv_5(var c :cuvant);
+var i :integer;
+begin
+with c do
+    begin
+    for i := 1 to len do
+        if vec_poz[i] then { daca caracterul a fost pozitionat intr-un loc gol }
+            mat[poz_l, poz_c-i+1] := '-'; { eliminam litera }
+    end;
+end;
+
 { afisam informatii despre cuvant  }
 procedure afis_cuv(var c :cuvant);
 var i :integer;
@@ -184,7 +208,7 @@ c.dir := 2;
 
 with c do
     begin
-    if (col + len - 1) <= nr_n then { avem loc spre dreapta }
+    if ((col + len - 1) <= nr_n) AND ((lin+len-1) <= nr_n) then { avem loc spre dreapta }
         begin
         for i := 1 to len do { parcurgem fiecare litera }
             begin
@@ -225,7 +249,7 @@ with c do
             if mat[lin+i-1, col] = '-' then { locul este gol }
                 begin
                 vec_poz[i] := true; { marcam litera ca adaugata }
-                mat[lin+i-1, col] := st[i]; { adaugam cifra  }
+                mat[lin+i-1, col] := st[i]; { adaugam caracterul }
                 end
             else { exista deja o litera }
                 if mat[lin+i-1, col] <> st[i] then { daca litera din matrice nu coincide }
@@ -240,6 +264,70 @@ with c do
 end;
 
 { pozitionam cuvantul in stanga jos, diagonala secundara spre stanga }
+function poz_cuv_4(lin, col :integer; var c :cuvant):boolean;
+var i :integer;
+begin
+poz_cuv_4 := true; { consideram ca il putem pozitiona }
+
+{ atribuim meta-data }
+c.poz_l := lin;
+c.poz_c := col;
+c.dir:= 4;
+
+with c do
+    begin
+    if ((col-len+1) >= 1) AND ((lin+len-1) <= nr_n) then { avem loc spre stanga }
+        begin
+        for i := 1 to len do  { parcurgem fiecare caracter }
+            if mat[lin+i-1, col-i+1] = '-' then { avem spartiu liber }
+                begin
+                vec_poz[i] := true; { marcam litera ca pusa intr-un spatiu liber }
+                mat[lin+i-1, col-i+1] := st[i]; { adaugam litera }
+                end
+            else { avem deja un caracter }
+                if mat[lin+i-1, col-i+1] <> st[i] then { daca caracterul din matrice nu coincide }
+                    begin
+                    poz_cuv_4 := false; { nu putem aseja }
+                    break;
+                    end;
+        end
+    else { nu avem loc spre stanga }
+        poz_cuv_4 := false;
+    end;
+end;
+
+{ pozitionam cuvantul in stanga }
+function poz_cuv_5(lin, col :integer; var c :cuvant):boolean;
+var i :integer;
+begin
+poz_cuv_5 := true; { consideram ca il putem pozitiona }
+
+{ atribuim meta-data }
+c.poz_l := lin;
+c.poz_c := col;
+c.dir:= 5;
+
+with c do
+    begin
+    if (col-len+1) >= 1 then { avem spatiu }
+        begin
+        for i := 1 to len do { parcurgem caracterele }
+            if mat[lin, col-i+1] = '-' then { avem spatiu liber }
+                begin
+                vec_poz[i] := true; { marcam caracterul ca introdus intr-un spatiu liber }
+                mat[lin, col-i+1] := st[i]; { atribuim caracterul }
+                end
+            else { exista deja un caracter }
+                if mat[lin, col-i+1] <> st[i] then { exista alt caracter  }
+                    begin
+                    poz_cuv_5 := false; { nu putem pozitiona }
+                    break;
+                    end;
+        end
+    else { nu avem spatiu }
+        poz_cuv_5 := false;
+    end;
+end;
 
 { ====================================================== }
 { proceduri legate de matrice }
@@ -269,13 +357,12 @@ end;
 { ====================================================== }
 { test  }
 
-procedure test;
+procedure Interactive;
 var i, aux_i, aux_j, aux_n :integer;
     s, cm :string;
     aux_cuv :cuvant;
 begin
 cm := '';
-
 { Setup 1 }
 writeln('Init matrice 6');
 nr_n := 6;
@@ -292,52 +379,61 @@ while  lowercase(cm) <> 'q' do
         begin
         write('i= ');
         readln(aux_i);
-
         write('j= ');
         readln(aux_j);
-
         write('s= ');
         readln(s);
 
         init_cuv(aux_cuv, s);
-
         poz_cuv_1(aux_i, aux_j, aux_cuv);
         end;
-
     if cm = 'poz_2' then { daca vrem sa pozitionam spre dreapta }
         begin
         write('i= ');
         readln(aux_i);
-
         write('j= ');
         readln(aux_j);
-
         write('s= ');
         readln(s);
 
         init_cuv(aux_cuv, s);
-
         poz_cuv_2(aux_i, aux_j, aux_cuv);
         end;
-
-
     if cm = 'poz_3' then { daca vrem sa pozitionam spre dreapta }
         begin
         write('i= ');
         readln(aux_i);
-
         write('j= ');
         readln(aux_j);
-
         write('s= ');
         readln(s);
 
         init_cuv(aux_cuv, s);
-
         poz_cuv_3(aux_i, aux_j, aux_cuv);
         end;
+    if cm = 'poz_4' then { daca se doreste pozitionarea spre stanga jos }
+        begin
+        write('i= ');
+        readln(aux_i);
+        write('j= ');
+        readln(aux_j);
+        write('s= ');
+        readln(s);
+        end;
+    if cm = 'poz_5' then { daca se doreste pozitionarea spre stanga jos }
+        begin
+        write('i= ');
+        readln(aux_i);
+        write('j= ');
+        readln(aux_j);
+        write('s= ');
+        readln(s);
 
-    if cm = 'afis_mat' then { daca se doreste afisarea matrici  }
+        init_cuv(aux_cuv, s);
+        poz_cuv_5(aux_i, aux_j, aux_cuv);
+        end;
+
+    if cm = 'mat' then { daca se doreste afisarea matrici  }
         begin
         afis_mat(mat, nr_n);
         end;
@@ -362,6 +458,14 @@ while  lowercase(cm) <> 'q' do
     if cm = 'undo_3' then { stergem cuvantul  }
         begin
         undo_cuv_3(aux_cuv);
+        end;
+    if cm = 'undo_4' then { stergem cuvantul  }
+        begin
+        undo_cuv_4(aux_cuv);
+        end;
+    if cm = 'undo_5' then { stergem cuvantul  }
+        begin
+        undo_cuv_5(aux_cuv);
         end;
 
     if cm = 'afis_c' then { afisam informatii despre cuvant }
@@ -443,21 +547,21 @@ if HasParams then
     { checking for help  }
     if HasOption('h') or HasOption('help') then
         begin
-        writeln('Afisam Help')
+        writeln('Afisam Help');
         something_was_run := true; { s-a rulat o comanda }
-        end;
+        end
     else { se doreste rulare }
         begin
         { checking for filename problems  }
         if HasOption('f') then
             begin
-            writeln('Handle filename -f')
+            writeln('Handle filename -f');
             something_was_run := true; { s-a rulat o comanda }
             end
         else
             if HasOption('file') then
                 begin
-                writeln('Handle filename --file')
+                writeln('Handle filename --file');
                 something_was_run := true; { s-a rulat o comanda }
                 end
             else
@@ -479,6 +583,5 @@ else
 end;
 
 begin
-test;
+Interactive;
 end.
-
