@@ -35,6 +35,12 @@ uses SysUtils; { has the function FileExists }
 const max_n = 100; { dimensiunea maxima a matrici  }
       max_m = 100; { numarul maxim de cuvinte  }
       max_dir = 7; { numarul de directii }
+      { version information }
+      version = '2.0.0'; 
+      autor = 'Micu Matei-Marius';
+      git = 'https://github.com/matei10/generate-char-puzzle';
+      gmail = 'micumatei@gmail.com';
+
 type vector_bool = array[1..255] of boolean;
      matrice_c = array[1..max_n, 1..max_n] of char;
 
@@ -48,7 +54,7 @@ type vector_bool = array[1..255] of boolean;
 
 var vec_c :vector_cuv;
     mat :matrice_c;
-    nr_cuv, nr_n :integer;
+    nr_cuv, nr_n, len_max :integer;
     rez :boolean;
 { ====================================================== }
 { proceduri legate de matrice }
@@ -116,10 +122,7 @@ with c do
     begin
     for i := 1 to len do
         if vec_poz[i] then { daca litera de pe pozitia <i> a fost pusa  }
-            begin
             mat[poz_l, poz_c + i - 1] := '-'; { eliminam din matrice litera }
-            writeln('1-',poz_l, '-',  poz_c +i -1);{ ------------------------------------  }
-            end;
     end;
 { reinitializam cuvantul  }
 init_cuv(c, c.st);
@@ -135,10 +138,7 @@ with c do
     begin
     for i := 1 to len do
         if vec_poz[i] then { daca litera de pe pozitia <i> a fost pusa  }
-            begin
             mat[poz_l + i - 1, poz_c + i - 1] := '-'; { eliminam din matrice litera }
-            writeln('2-',poz_l+i-1, '-',  poz_c +i -1);{ ------------------------------------  }
-            end;
     end;
 { reinitializam cuvantul  }
 init_cuv(c, c.st);
@@ -154,10 +154,7 @@ with c do
     begin
     for i := 1 to len do
         if vec_poz[i] then { daca litera de pe pozitia <i> a fost pusa  }
-            begin
             mat[poz_l + i -1, poz_c] := '-'; { eliminam din matrice litera }
-            writeln('3-',poz_l+i-1, '-',  poz_c);{ ------------------------------------  }
-            end;
     end;
 { reinitializam cuvantul  }
 init_cuv(c, c.st);
@@ -171,10 +168,7 @@ with c do
     begin
     for i := 1 to len do
         if vec_poz[i] then { daca litera a fost pozitionata intr-un loc gol }
-            begin
             mat[poz_l+i-1, poz_c-i+1] := '-'; { eliminam litera din matrice }
-            writeln('4-',poz_l+i-1, '-',  poz_c-i+1);{ ------------------------------------  }
-            end;
     end;
 end;
 
@@ -186,10 +180,7 @@ with c do
     begin
     for i := 1 to len do
         if vec_poz[i] then { daca caracterul a fost pozitionat intr-un loc gol }
-            begin
             mat[poz_l, poz_c-i+1] := '-'; { eliminam litera }
-            writeln('5-',poz_l, '-',  poz_c-i+1);{ ------------------------------------  }
-            end;
     end;
 end;
 
@@ -201,10 +192,7 @@ with c do
     begin
     for i := 1 to len do
         if vec_poz[i] then { daca caracteruk <i> a fost pozitionat intr-un loc gol }
-            begin
             mat[poz_l-i+1, poz_c-i+1] := '-'; { eliminam litera }
-            writeln('6-',poz_l-i+1, '-',  poz_c-i+1);{ ------------------------------------  }
-            end;
     end;
 end;
 
@@ -216,22 +204,12 @@ with c do
     begin
     for i := 1 to len do
         if vec_poz[i] then  { daca litera a fost introdusa }
-            begin
             mat[poz_l-i+1, poz_c] := '-'; { eliminam litera }
-            writeln('7-',poz_l-i+1, '-',  poz_c);{ ------------------------------------  }
-            end;
     end;
 end;
 
 procedure handle_undo_cuv(var c :cuvant);
 begin
-writeln('Stergem cuvantul :', c.st);
-writeln('lin :', c.poz_l);
-writeln('col :', c.poz_c);
-writeln('dir :', c.dir);
-writeln('Befour del:');
-afis_mat(mat, nr_n);
-writeln;
 case c.dir of 
     1: begin { daca cuvantul a fost scris spre dreapta }
         undo_cuv_1(c);
@@ -264,10 +242,6 @@ case c.dir of
 
 { reinitializam cuvantul }
 construct_cuv(c);
-writeln;
-writeln('after undo :');
-afis_mat(mat, nr_n);
-writeln;
 end;
 
 { afisam informatii despre cuvant  }
@@ -296,11 +270,6 @@ var i :integer;
 begin
 poz_cuv_1 := true; { consideram ca il putem pozitiona }
 
-{ cuvantul stie din ce pozitie incepe, si in ce directie se indreapta  }
-c.poz_l := lin;
-c.poz_c := col;
-c.dir := 1;
-
 with c do
     begin
     if (col + len - 1) <= nr_n then { avem loc spre dreapta  }
@@ -328,11 +297,6 @@ function poz_cuv_2(lin, col :integer;var c :cuvant):boolean;
 var i :integer;
 begin
 poz_cuv_2 := true; { consideram ca il putem pozitiona }
-
-{ cuvantul stie din ce pozitie incepe, si in ce directie se indreapta  }
-c.poz_l := lin;
-c.poz_c := col;
-c.dir := 2;
 
 with c do
     begin
@@ -364,11 +328,6 @@ var i :integer;
 begin
 poz_cuv_3 := true; { consideram ca il putem pozitiona }
 
-{ atribuim meta-data }
-c.poz_l := lin;
-c.poz_c := col;
-c.dir:= 3;
-
 with c do
     begin
     if (lin+len-1) <= nr_n then { avem loc  }
@@ -396,11 +355,6 @@ function poz_cuv_4(lin, col :integer; var c :cuvant):boolean;
 var i :integer;
 begin
 poz_cuv_4 := true; { consideram ca il putem pozitiona }
-
-{ atribuim meta-data }
-c.poz_l := lin;
-c.poz_c := col;
-c.dir:= 4;
 
 with c do
     begin
@@ -430,11 +384,6 @@ var i :integer;
 begin
 poz_cuv_5 := true; { consideram ca il putem pozitiona }
 
-{ atribuim meta-data }
-c.poz_l := lin;
-c.poz_c := col;
-c.dir:= 5;
-
 with c do
     begin
     if (col-len+1) >= 1 then { avem spatiu }
@@ -462,11 +411,6 @@ function poz_cuv_6(lin, col :integer;var c :cuvant):boolean;
 var i :integer;
 begin
 poz_cuv_6 := true; { presupunem ca putem pozitiona }
-
-{ atribuim meta-data }
-c.poz_l := lin;
-c.poz_c := col;
-c.dir := 6;
 
 with c do
     begin
@@ -496,11 +440,6 @@ var i :integer;
 begin
 poz_cuv_7 := true; { consideram ca putem pozitiona }
 
-{atribuim meta-data}
-c.poz_l := lin;
-c.poz_c := col;
-c.dir := 7;
-
 with c do
     begin
     if (lin-len+1) >= 1 then { avem loc in sus }
@@ -528,13 +467,11 @@ function handle_poz_cuv(lin, col, dir :integer;var cuv :cuvant):boolean;
 begin
 handle_poz_cuv := false;
 
-writeln('Incercam sa punem :', cuv.st);
-writeln('lin :',lin);
-writeln('col :',col);
-writeln('dir :',dir);
-writeln('Befour adding');
-afis_mat(mat, nr_n);
-writeln;
+{ adaugam meta-data }
+cuv.poz_l := lin;
+cuv.poz_c := col;
+cuv.dir := dir;
+
 case dir of
     1 : begin { pozitionare spre dreapta }
         handle_poz_cuv := poz_cuv_1(lin, col, cuv);
@@ -566,10 +503,6 @@ case dir of
     end;
 if not handle_poz_cuv then { daca nu am putut pozitiona }
     handle_undo_cuv(cuv);
-writeln;
-writeln('After :');
-afis_mat(mat, nr_n);
-writeln;
 end;
 
 { ====================================================== }
@@ -580,6 +513,7 @@ var i :integer;
     f :text;
     aux_s :string;
 begin
+len_max := 0;
 if FileExists(s) then { daca fisierul exista }
     begin
     assign(f, s);
@@ -596,14 +530,17 @@ if FileExists(s) then { daca fisierul exista }
     for i := 1 to nr_cuv do
         begin
         readln(f, aux_s);
+        if length(aux_s) > len_max then
+            len_max := length(aux_s);
 
         init_cuv(vec_c[i], aux_s); { initializam cuvantul }
         end;
+
     citire_input := true;
+
     end
 else { fisierul nu exista }
     citire_input := false;
-
 end;
 
 { ====================================================== }
@@ -612,9 +549,7 @@ end;
 procedure start(nr_c :integer);
 var lin, col, dir :integer;
 begin
-writeln('cur :', nr_cuv);
-afis_mat(mat, nr_n);
-writeln;
+{ initializam  }
 lin := 1;
 col := 1;
 dir := 1;
@@ -656,14 +591,9 @@ end;
 procedure Interactive;
 var aux_i, aux_j, aux_d, aux_n :integer;
     cm :string;
-    aux_cuv :cuvant;
 begin
-cm := '';
-{ Setup 1 }
-citire_input('input.txt');
-handle_poz_cuv(1, 1, 1, vec_c[1]); { punem ana }
-handle_poz_cuv(1, 1, 2, vec_c[2]); { punem argo }
-handle_poz_cuv(1, 4, 4, vec_c[3]); { punem nora }
+cm := ''; { initializam commanda  }
+
 { ENDSetup 1 }
 while  lowercase(cm) <> 'q' do 
     begin
@@ -689,12 +619,13 @@ while  lowercase(cm) <> 'q' do
         end;
 
 
-    if cm = 'mat' then { daca se doreste afisarea matrici  }
+    { matrice commands }
+    if lowercase(cm) = 'show_mat' then { daca se doreste afisarea matrici  }
         begin
         afis_mat(mat, nr_n);
         end;
 
-    if cm = 'init_mat' then { daca se doreste initializarea  }
+    if lowercase(cm) = 'init_mat' then { daca se doreste initializarea  }
         begin
         write('n= ');
         readln(nr_n);
@@ -710,9 +641,13 @@ while  lowercase(cm) <> 'q' do
         handle_undo_cuv(vec_c[aux_i]);
         end;
 
-    if cm = 'afis_c' then { afisam informatii despre cuvant }
+    { cuvant commands }
+    if lowercase(cm) = 'show_cuv' then { afisam informatii despre cuvant }
         begin
-        afis_cuv(aux_cuv);
+        write('Numar :');
+        readln(aux_n);
+
+        afis_cuv(vec_c[aux_n]);
         end;
     end;
 end;
@@ -724,11 +659,32 @@ begin
 case s of 
     '' :
         begin
-        writeln('Full help');
+        writeln('Scop :');
+        writeln('Acest program creeaza o matrice in care se vor regasi toate cuvintele din fisier.');
+        writeln('Fisierul este de forma :');
+        writeln('<ordin_matrice>');
+        writeln('<numar_cuvinte>');
+        writeln('<cuvant_1>');
+        writeln('<cuvant_2>');
+        writeln('<........>');
+        writeln('<cuvant_n>');
+        writeln;
+        writeln('Urmatoarele obtiuni sunt disponibile :');
+        writeln(' -f');
+        writeln(' --file=name       :fisierul din care citim cuvintele si dimensiunile matrici');
+        writeln;
+        writeln(' -i');
+        writeln(' --interactiv      :acctivam modul interactiv, care ne permite sa manipulam cuvinte');
+        writeln;
+        writeln(' -v');
+        writeln(' --version         :afisam versiunea, si alte informatii');
         end;
     'short': 
         begin
         writeln('Short help');
+        end;
+    'nu_incape':
+        begin
         end;
     end;
 end;
@@ -796,7 +752,7 @@ end;
 
 { handler }
 procedure HandleInput;
-var something_was_run :boolean;
+var something_was_run, start_was_run :boolean;
 begin
 { verificam daca exista parametri }
 if HasParams then
@@ -813,10 +769,17 @@ if HasParams then
         if HasOption('f') then
             begin
             if citire_input(GetValueParam('f')) then 
-                begin
-                start(1); { incepem sa rulam programul }
-                something_was_run := true { s-a rulat o comanda }
-                end
+                if len_max <= nr_n then { cel mai lung cuvant incape in matrice }
+                    begin
+                    start(1); { incepem sa rulam programul }
+                    something_was_run := true; { s-a rulat o comanda }
+                    start_was_run := true; { s-a rulat startu }
+                    end
+                else
+                    begin
+                    help('nu_incape');
+                    help('short');
+                    end
             else
                 begin
                 writeln('ERROR: Fisierul nu a fost gasit !');
@@ -827,10 +790,17 @@ if HasParams then
             if HasOption('file') then
                 begin
                 if citire_input(GetValueParam('file')) then 
-                    begin
-                    start(1); { incepem sa rulam programul }
-                    something_was_run := true { s-a rulat o comanda }
-                    end
+                    if len_max <= nr_n then
+                        begin
+                        start(1); { incepem sa rulam programul }
+                        something_was_run := true; { s-a rulat o comanda }
+                        start_was_run := true; { s-a rulat startu }
+                        end
+                    else
+                        begin
+                        help('nu_incape');
+                        help('short');
+                        end
                 else
                     begin
                     writeln('ERROR: Fisierul nu a fost gasit !');
@@ -844,28 +814,33 @@ if HasParams then
                 help('short'); { Afisam un mic ajutor }
                 end;
 
+        if start_was_run then
+            if rez then { daca am rezolvar }
+                begin
+                writeln('Rezolvare :');
+                afis_mat(mat, nr_n);
+                end
+            else
+                writeln('Nu Am rezolvat');
+
         { verificam daca se doreste modul interactiv }
         if HasOption('i') or HasOption('interactive') then
             begin
-            writeln('Start Interactive Mode');
+            Interactive;
             something_was_run := true; { s-a rulat o comanda }
             end;
         end;
     end
-else
+else { daca nu s-au adaugat parametri }
     help('short'); { Afisam un mic ajutor }
 
-if not something_was_run then
+if not something_was_run then { daca nu s-a rulat nimic }
     help('short'); { Afisam un mic ajutor }
+
+
 end;
 
 begin
 HandleInput;
 (* Interactive; *)
-
-if rez then
-    begin
-    writeln('REz :');
-    afis_mat(mat, nr_n);
-    end;
 end.
