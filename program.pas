@@ -30,11 +30,11 @@ program creare_puzzle_v2;
 
     - test debug #
     
-    - implementare versiune
+    - implementare versiune #
 
-    - countere (ramane de stabilit)
+    - countere (ramane de stabilit) # d_...
 
-    - check_it_can_be_done ( verificam daca cel mai lung cuvant <= nr_n )
+    - check_it_can_be_done ( verificam daca cel mai lung cuvant <= nr_n ) # did
 
     - interactiv mode 
 
@@ -44,7 +44,7 @@ const max_n = 100; { dimensiunea maxima a matrici  }
       max_m = 100; { numarul maxim de cuvinte  }
       max_dir = 8; { numarul de directii }
       { version information }
-      version = '2.0.1'; 
+      version = '2.2.0'; 
       autor = 'Micu Matei-Marius';
       git = 'https://github.com/matei10/generate-char-puzzle';
       gmail = 'micumatei@gmail.com';
@@ -706,6 +706,41 @@ end;
 { ====================================================== }
 { Interactive Mode  }
 
+procedure help_int(s :string);
+begin
+case s of   
+    '' :
+        begin
+        writeln;
+        writeln(' Aveti urmatoarele comezi :');
+        writeln('  poz          : deschide un meniu din care puteti pozitiona un cuvant ');
+        writeln;
+        writeln('  undo         : deschide un meniu din care puteti sterge un cuvant ');
+        writeln;
+        writeln('  show_mat     : afiseaza matricea ');
+        writeln;
+        writeln('  show_cuv     : afiseaza informatii despre un cuvant ');
+        writeln;
+        writeln('  init_mat     : initializeaza o noua matrice de orce ordin ');
+        writeln;
+        writeln('  add_cuv      : adaugati un cuvant in array ');
+        writeln;
+        writeln('  info         : informatii generale despre statulul programului ');
+        writeln;
+        writeln('  q            : iestiti din modul interactiv si din program  ');
+        writeln('  quit ');
+        writeln('  exit ');
+        end;
+    'info':
+        begin
+        writeln;
+        writeln(' Numarul de cuvinte stocate : ', nr_cuv);
+        writeln(' Ordinea matrici : ', nr_n);
+        end;
+    end;
+writeln;
+end;
+
 procedure Interactive;
 var aux_i, aux_j, aux_d, aux_n :integer;
     aux_s, cm :string;
@@ -718,7 +753,7 @@ while  (lowercase(cm) <> 'q') and (lowercase(cm) <> 'quit') and (lowercase(cm) <
     readln(cm);
 
     { pozitionari  }
-    if lowercase(cm) = 'add' then { daugam un cuvant }
+    if lowercase(cm) = 'poz' then { daugam un cuvant }
         begin
         write('Linie :');
         readln(aux_i);
@@ -780,9 +815,13 @@ while  (lowercase(cm) <> 'q') and (lowercase(cm) <> 'quit') and (lowercase(cm) <
     { daca se doreste ajutor }
     if lowercase(cm) = 'help' then { afisam help }
         begin
-        writeln;
-        writeln('Aveti urmatoarele comezi disponibile :');
+        help_int('');
+        end;
 
+    { daca se doresc informatii }
+    if lowercase(cm) = 'info' then
+        begin
+        help_int('info');
         end;
     end;
 end;
@@ -812,38 +851,37 @@ begin
 case s of 
     '' :
         begin
-        writeln('Scop :');
-        writeln('Acest program creeaza o matrice in care se vor regasi toate cuvintele din fisier.');
+        writeln(' Scop :');
+        writeln(' Acest program creeaza o matrice in care se vor regasi toate cuvintele din fisier.');
         writeln;
-        writeln('Fisierul este de forma :');
+        writeln(' Fisierul este de forma :');
         writeln;
-        writeln('<ordin_matrice>');
-        writeln('<numar_cuvinte>');
-        writeln('<cuvant_1>');
-        writeln('<cuvant_2>');
-        writeln('<........>');
-        writeln('<cuvant_n>');
+        writeln(' <ordin_matrice>');
+        writeln(' <numar_cuvinte>');
+        writeln(' <cuvant_1>');
+        writeln(' <cuvant_2>');
+        writeln(' <........>');
+        writeln(' <cuvant_n>');
         writeln;
-        writeln('Urmatoarele obtiuni sunt disponibile :');
-        writeln(' -f');
-        writeln(' --file=name         : fisierul din care citim cuvintele si dimensiunile matrici');
+        writeln(' Urmatoarele obtiuni sunt disponibile :');
+        writeln('  -f');
+        writeln('  --file=name         : fisierul din care citim cuvintele si dimensiunile matrici');
         writeln;
-        writeln(' -i');
-        writeln(' --interactiv        : acctivam modul interactiv, care ne permite sa manipulam cuvinte');
+        writeln('  -i');
+        writeln('  --interactiv        : acctivam modul interactiv, care ne permite sa manipulam cuvinte');
         writeln;
-        writeln(' -v');
-        writeln(' --version           : afisam versiunea, si alte informatii');
+        writeln('  -v');
+        writeln('  --version           : afisam versiunea, si alte informatii');
         writeln;
-        writeln(' -d');
-        writeln(' --debug=true/false  : valoarea default este false, dar daca se rescrie, se vor afisa diferite');
-        writeln('                       valori auxiliare');
+        writeln('  -d');
+        writeln('  --debug=true/false  : valoarea default este false, dar daca se rescrie, se vor afisa diferite');
+        writeln('                        valori auxiliare');
         writeln;
-        writeln(' -h');
-        writeln(' --help              : afisam ajutorul acesta');
+        writeln('  -h');
+        writeln('  --help              : afisam ajutorul acesta');
         end;
     'short': 
         begin
-        writeln(' Nu am reusit sa intelegem ce doriti.');
         writeln(' Accesati -h sau --help pentru mai multe informatii.')
         end;
     'nu_incape':
@@ -851,7 +889,7 @@ case s of
         writeln(' Urmatoarele cuvinte :');
         for i := 1 to nr_cuv do
             if vec_c[i].len = len_max then
-                writeln(vec_c[i].st);
+                writeln('    - ',vec_c[i].st);
         writeln;
         writeln(' Au lungimea ', len_max,' si nu pot incapea intr-o matrice de ordin ', nr_n, ' .');
         end;
@@ -888,12 +926,21 @@ case s of
         end;
     'version':
         begin
+        writeln;
+        writeln(' Version      :', version);
+        writeln(' Author       :', autor);
+        writeln(' Email        :', gmail);
+        writeln(' GitHub Repo  :', git);
         end;
     'interactiv':
         begin
         writeln;
-        writeln('Ati intrat in modul interactiv puteti folosi comanda <help> pentru a afla mai multe');
+        writeln(' Ati intrat in modul interactiv puteti folosi comanda <help> pentru a afla mai multe');
         writeln;
+        end;
+    'nu_am_inteles':
+        begin
+        writeln(' Nu am inteles comanda !')
         end;
     end;
 writeln;
@@ -969,12 +1016,19 @@ start_was_run := false;
 { verificam daca exista parametri }
 if HasParams then
     begin
+    { verificam daca se doreste afisarea versiuni  }
+    if HasOption('v') or HasOption('version') then
+        begin
+        help('version');
+        something_was_run := true;
+        end;
+
     { checking for help  }
     if not something_was_run then 
         begin
         if HasOption('h') or HasOption('help') then
             begin
-            writeln('Afisam Help');
+            help('');
             something_was_run := true; { s-a rulat o comanda }
             end
         else { se doreste rulare }
@@ -991,11 +1045,13 @@ if HasParams then
                         end
                     else { daca avem un cuvant prea lung }
                         begin
+                            something_was_run := true; { s-a rulat o comanda }
                         help('nu_incape');
                         help('short');
                         end
                 else { nu am putut citi fisietul trimis ca parametrul lui 'f' }
                     begin
+                    something_was_run := true; { s-a rulat o comanda }
                     help('nu_a_fost_gasit');
                     help('short'); { Afisam un mic ajutor }
                     end;
@@ -1012,11 +1068,13 @@ if HasParams then
                             end
                         else { nu incape  }
                             begin
+                            something_was_run := true; { s-a rulat o comanda }
                             help('nu_incape');
                             help('short');
                             end
                     else { nu am gasit fisierul }
                         begin
+                        something_was_run := true; { s-a rulat o comanda }
                         help('nu_a_fost_gasit');
                         help('short'); { Afisam un mic ajutor }
                         end;
@@ -1059,10 +1117,16 @@ if HasParams then
         end; { end not something_.. }
 
     if not something_was_run then { daca nu s-a rulat nimic }
+        begin
+        help('nu_am_inteles');
         help('short'); { Afisam un mic ajutor }
+        end;
     end
 else { daca nu s-au adaugat parametri }
+    begin
+    help('nu_am_inteles');
     help('short'); { Afisam un mic ajutor }
+    end;
 end;
 
 begin
