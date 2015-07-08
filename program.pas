@@ -1,44 +1,4 @@
 program creare_puzzle_v2;
-{ To Do :
-    - git integration #
-    - command line option #
-
-    - poz_4 #
-    - poz_5 #
-    - poz_6 #
-    - poz_7 #
-
-    - undo_4 #
-    - undo_5 #
-    - undo_6 #
-    - undo_7 #
-
-    - test poz_4/5/.. si undo_4/5/.. #
-
-    - poz_final #
-    - undo_final #
-    
-    - test poz_final si undo_final #
-
-    - citire cuvinte din fisier #
-
-    - start #
-
-    - test poz_8 si undo_8 #
-
-    - finish debug #
-
-    - test debug #
-    
-    - implementare versiune #
-
-    - countere (ramane de stabilit) # d_...
-
-    - check_it_can_be_done ( verificam daca cel mai lung cuvant <= nr_n ) # did
-
-    - interactiv mode 
-
-    }
 uses SysUtils; { has the function FileExists }
 const max_n = 100; { dimensiunea maxima a matrici  }
       max_m = 100; { numarul maxim de cuvinte  }
@@ -48,6 +8,7 @@ const max_n = 100; { dimensiunea maxima a matrici  }
       autor = 'Micu Matei-Marius';
       git = 'https://github.com/matei10/generate-char-puzzle';
       gmail = 'micumatei@gmail.com';
+      licenta = 'The MIT License (MIT)';
 
 type vector_bool = array[1..255] of boolean;
      vector_int = array[1..8] of integer;
@@ -936,6 +897,7 @@ case s of
         writeln(' Author       :', autor);
         writeln(' Email        :', gmail);
         writeln(' GitHub Repo  :', git);
+        writeln(' Licenta      :', licenta);
         end;
     'interactiv':
         begin
