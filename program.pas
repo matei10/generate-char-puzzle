@@ -736,6 +736,7 @@ case s of
         writeln;
         writeln(' Numarul de cuvinte stocate : ', nr_cuv);
         writeln(' Ordinea matrici : ', nr_n);
+        writeln(' Version : ', version);
         end;
     end;
 writeln;
@@ -764,7 +765,7 @@ while  (lowercase(cm) <> 'q') and (lowercase(cm) <> 'quit') and (lowercase(cm) <
         write('Directie :');
         readln(aux_d);
 
-        write('Numar :');
+        write('Numarul cuvantului :');
         readln(aux_n);
 
         handle_poz_cuv(aux_i, aux_j, aux_d, vec_c[aux_n]);
@@ -798,7 +799,7 @@ while  (lowercase(cm) <> 'q') and (lowercase(cm) <> 'quit') and (lowercase(cm) <
     { undo  }
     if lowercase(cm) = 'undo' then
         begin
-        write('Numar :');
+        write('Numararul cuvantului :');
         readln(aux_i);
         handle_undo_cuv(vec_c[aux_i]);
         end;
@@ -806,7 +807,7 @@ while  (lowercase(cm) <> 'q') and (lowercase(cm) <> 'quit') and (lowercase(cm) <
     { cuvant commands }
     if lowercase(cm) = 'show_cuv' then { afisam informatii despre cuvant }
         begin
-        write('Numar :');
+        write('Numarul cuvantului :');
         readln(aux_n);
 
         afis_cuv(vec_c[aux_n]);
@@ -877,6 +878,10 @@ case s of
         writeln('  --debug=true/false  : valoarea default este false, dar daca se rescrie, se vor afisa diferite');
         writeln('                        valori auxiliare');
         writeln;
+        writeln('  -c');
+        writeln('  --create=name       : se intra in modul care ajuta la creearea unui fisier input ');
+        writeln('                        daca un nume nu este precizat atunci se va folosi defaul.txt ');
+        writeln;
         writeln('  -h');
         writeln('  --help              : afisam ajutorul acesta');
         end;
@@ -942,12 +947,71 @@ case s of
         begin
         writeln(' Nu am inteles comanda !')
         end;
+    'create':
+        begin
+        writeln;
+        writeln(' Doriti sa creati un fisier pe care sa il folosit ca input.');
+        end;
     end;
 writeln;
 end;
 
 { ====================================================== }
 { Command Line handeling }
+
+{ cream un fisier input  }
+procedure create_imput(s :string);
+var ok :boolean;
+    comanda :string;
+    f :text;
+    aux_i, i :integer;
+begin
+if FileExists(s) then 
+    begin
+    write(' Fisierul cu numele <',s,'> exista deja, doriti sa il rescrieti?(y/n):');
+    readln(comanda);
+    if (lowercase(comanda) = 'y') or (lowercase(comanda) = 'yes') or (lowercase(comanda) = 'da') then
+        ok := true
+    else
+        ok := false;
+    end
+else
+    ok := true;
+
+if ok then
+    begin
+    assign(f, s);
+    rewrite(f);
+
+    write(' Ce ordin doriti sa aiba matricea ( adica cat pe cat va fi patratul ) :  ');
+    read(aux_i);
+
+    writeln(f, aux_i); { scriem in fisier ordinum latrici }
+
+
+    write(' Cate cuvinte doriti sa pozitonati in matrice :');
+    read(aux_i);
+
+    writeln(f, aux_i); { scriem in fisier numarul de cuvinte }
+
+    for i := 1 to aux_i do
+        begin
+        write(' Cuvantul nr. ', i,' : ');
+        readln(comanda);
+        writeln(f, comanda);
+        end;
+
+    close(f);
+    writeln(' Am creat fisierul cu succes !');
+    writeln;
+    end
+else
+    begin
+    writeln(' Au existat probleme.');
+    writeln(' Oprim creearea fisierului !');
+    writeln;
+    end;
+end;
 
 { verificam daca exista optiunea <s> }
 function HasOption(s :string):boolean;
@@ -1006,9 +1070,19 @@ begin
 HasParams := (ParamCount > 0)
 end;
 
+{ returnam defaul.txt sau numele fisierului  }
+function GetCreateParram(s :string):string;
+begin
+if GetValueParam(s) <> '' then
+    GetCreateParram  := GetValueParam(s)
+else
+    GetCreateParram  := 'default.txt';
+end;
+
 { handler }
 procedure HandleInput;
 var something_was_run, start_was_run :boolean;
+    aux_s :string;
 begin
 something_was_run := false;
 start_was_run := false;
@@ -1016,112 +1090,130 @@ start_was_run := false;
 { verificam daca exista parametri }
 if HasParams then
     begin
-    { verificam daca se doreste afisarea versiuni  }
-    if HasOption('v') or HasOption('version') then
+    if HasOption('c') then { daca se doreste creearea unui fisier }
         begin
-        help('version');
-        something_was_run := true;
-        end;
-
-    { checking for help  }
-    if not something_was_run then 
+        aux_s := GetCreateParram('c');
+        help('create');
+        create_imput(aux_s);
+        end
+    else
         begin
-        if HasOption('h') or HasOption('help') then
+        if HasOption('create') then
             begin
-            help('');
-            something_was_run := true; { s-a rulat o comanda }
+            aux_s := GetCreateParram('create');
+            help('create');
+            create_imput(aux_s);
             end
-        else { se doreste rulare }
+        else
             begin
-            { checking for filename problems  }
-            if HasOption('f') then
+            { verificam daca se doreste afisarea versiuni  }
+            if HasOption('v') or HasOption('version') then
                 begin
-                if citire_input(GetValueParam('f')) then 
-                    if len_max <= nr_n then { cel mai lung cuvant incape in matrice }
-                        begin
-                        start(1); { incepem sa rulam programul }
-                        something_was_run := true; { s-a rulat o comanda }
-                        start_was_run := true; { s-a rulat startu }
-                        end
-                    else { daca avem un cuvant prea lung }
-                        begin
-                            something_was_run := true; { s-a rulat o comanda }
-                        help('nu_incape');
-                        help('short');
-                        end
-                else { nu am putut citi fisietul trimis ca parametrul lui 'f' }
+                help('version');
+                something_was_run := true;
+                end;
+
+            { checking for help  }
+            if not something_was_run then 
+                begin
+                if HasOption('h') or HasOption('help') then
                     begin
+                    help('');
                     something_was_run := true; { s-a rulat o comanda }
-                    help('nu_a_fost_gasit');
-                    help('short'); { Afisam un mic ajutor }
-                    end;
-                end
-            else { not has 'f' }
-                if HasOption('file') then
+                    end
+                else { se doreste rulare }
                     begin
-                    if citire_input(GetValueParam('file')) then 
-                        if len_max <= nr_n then
-                            begin
-                            start(1); { incepem sa rulam programul }
-                            something_was_run := true; { s-a rulat o comanda }
-                            start_was_run := true; { s-a rulat startu }
-                            end
-                        else { nu incape  }
-                            begin
-                            something_was_run := true; { s-a rulat o comanda }
-                            help('nu_incape');
-                            help('short');
-                            end
-                    else { nu am gasit fisierul }
+                    { checking for filename problems  }
+                    if HasOption('f') then
                         begin
-                        something_was_run := true; { s-a rulat o comanda }
-                        help('nu_a_fost_gasit');
-                        help('short'); { Afisam un mic ajutor }
+                        if citire_input(GetValueParam('f')) then 
+                            if len_max <= nr_n then { cel mai lung cuvant incape in matrice }
+                                begin
+                                start(1); { incepem sa rulam programul }
+                                something_was_run := true; { s-a rulat o comanda }
+                                start_was_run := true; { s-a rulat startu }
+                                end
+                            else { daca avem un cuvant prea lung }
+                                begin
+                                    something_was_run := true; { s-a rulat o comanda }
+                                help('nu_incape');
+                                help('short');
+                                end
+                        else { nu am putut citi fisietul trimis ca parametrul lui 'f' }
+                            begin
+                            something_was_run := true; { s-a rulat o comanda }
+                            help('nu_a_fost_gasit');
+                            help('short'); { Afisam un mic ajutor }
+                            end;
+                        end
+                    else { not has 'f' }
+                        if HasOption('file') then
+                            begin
+                            if citire_input(GetValueParam('file')) then 
+                                if len_max <= nr_n then
+                                    begin
+                                    start(1); { incepem sa rulam programul }
+                                    something_was_run := true; { s-a rulat o comanda }
+                                    start_was_run := true; { s-a rulat startu }
+                                    end
+                                else { nu incape  }
+                                    begin
+                                    something_was_run := true; { s-a rulat o comanda }
+                                    help('nu_incape');
+                                    help('short');
+                                    end
+                            else { nu am gasit fisierul }
+                                begin
+                                something_was_run := true; { s-a rulat o comanda }
+                                help('nu_a_fost_gasit');
+                                help('short'); { Afisam un mic ajutor }
+                                end;
+                            end
+                        else { nu are optiunea 'file' }
+                            begin
+                            help('nu_a_fost_gasit');
+                            something_was_run := true; { s-a rulat o comanda }
+                            help('short'); { Afisam un mic ajutor }
+                            end;
+
+                    if start_was_run then { daca am rulat staturl }
+                        begin
+                        if rez then { daca am rezolvar }
+                            begin
+                            writeln('Rezolvare :');
+                            afis_mat(mat, nr_n);
+                            end
+                        else
+                            help('nu_am_rezolvat');
                         end;
-                    end
-                else { nu are optiunea 'file' }
-                    begin
-                    help('nu_a_fost_gasit');
-                    something_was_run := true; { s-a rulat o comanda }
-                    help('short'); { Afisam un mic ajutor }
+
+                    { vedem daca se doreste afisarea informatiilor suplimentar }
+                    if HasOption('d') OR HasOption('debug') then
+                        if (lowercase(GetValueParam('d')) = 'true') OR (lowercase(GetValueParam('debug')) = 'true') then
+                            begin
+                            help('debug');
+                            something_was_run := true;
+                            end;
+
+                    { verificam daca se doreste modul interactiv }
+                    if HasOption('i') or HasOption('interactive') then
+                        begin
+                        help('interactiv');
+                        Interactive;
+                        something_was_run := true; { s-a rulat o comanda }
+                        end;
+
                     end;
+                end; { end not something_.. }
 
-            if start_was_run then { daca am rulat staturl }
+            if not something_was_run then { daca nu s-a rulat nimic }
                 begin
-                if rez then { daca am rezolvar }
-                    begin
-                    writeln('Rezolvare :');
-                    afis_mat(mat, nr_n);
-                    end
-                else
-                    help('nu_am_rezolvat');
+                help('nu_am_inteles');
+                help('short'); { Afisam un mic ajutor }
                 end;
-
-            { vedem daca se doreste afisarea informatiilor suplimentar }
-            if HasOption('d') OR HasOption('debug') then
-                if (lowercase(GetValueParam('d')) = 'true') OR (lowercase(GetValueParam('debug')) = 'true') then
-                    begin
-                    help('debug');
-                    something_was_run := true;
-                    end;
-
-            { verificam daca se doreste modul interactiv }
-            if HasOption('i') or HasOption('interactive') then
-                begin
-                help('interactiv');
-                Interactive;
-                something_was_run := true; { s-a rulat o comanda }
-                end;
-
-            end;
-        end; { end not something_.. }
-
-    if not something_was_run then { daca nu s-a rulat nimic }
-        begin
-        help('nu_am_inteles');
-        help('short'); { Afisam un mic ajutor }
-        end;
-    end
+            end; 
+            end; { end de la has --create mode  }
+    end { end HasParams  }
 else { daca nu s-au adaugat parametri }
     begin
     help('nu_am_inteles');
