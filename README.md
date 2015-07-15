@@ -1,6 +1,6 @@
 # generate-char-puzzle
 
-Acest program este scris in FreePascal si va genereaza o matrice un pozzle in care un numar de cuvinte se pot regasi citite, de la dreapta la stanga, in sus in jos si invers, si pe toate diagonalele.
+Acest program este scris in FreePascal si va genereaza o matrice un puzzle in care un numar de cuvinte se pot regasi citite, de la dreapta la stanga, in sus in jos si invers, si pe toate diagonalele.
 
 # Folosire:
 Puteti folosi varianta compilata de mine `program` a fost compilat cu
