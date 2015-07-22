@@ -6,7 +6,7 @@ const max_n = 100; { dimensiunea maxima a matrici  }
       { version information }
       version = '2.2.0'; 
       autor = 'Micu Matei-Marius';
-      git = 'https://github.com/matei10/generate-char-puzzle';
+      git = 'https://github.com/micumatei/generate-char-puzzle';
       gmail = 'micumatei@gmail.com';
       licenta = 'The MIT License (MIT)';
 
