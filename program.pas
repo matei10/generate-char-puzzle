@@ -1,22 +1,6 @@
 program creare_puzzle_v2;
 uses SysUtils; { has the function FileExists }
-const max_n = 100; { dimensiunea maxima a matrici  }
-      max_m = 100; { numarul maxim de cuvinte  }
-      max_dir = 8; { numarul de directii }
-      { version information }
-      version = '2.2.0'; 
-      autor = 'Micu Matei-Marius';
-      git = 'https://github.com/micumatei/generate-char-puzzle';
-      gmail = 'micumatei@gmail.com';
-      licenta = 'The MIT License (MIT)';
-
-type vector_bool = array[1..255] of boolean;
-     vector_int = array[1..8] of integer;
-     matrice_c = array[1..max_n, 1..max_n] of char;
-
-     cuvant = record
-        st :string;
-        len, poz_l, poz_c, dir :integer;
+constasdasd
         vec_poz :vector_bool;
         end;
 
